@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AddAlarmFragment">
+
+    <TimePicker
+        android:id="@+id/alarm_time_picker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/alarm_after"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="@dimen/spacing_middle"
+        android:text="@string/alarm_will_ring"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="@color/grey_90"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/alarm_time_picker" />
+
+    <!--    <View-->
+    <!--        android:id="@+id/lineDivider"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="1px"-->
+    <!--        android:background="@color/grey_90" />-->
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/alarm_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_middle"
+        android:background="@color/grey_3"
+        app:hintEnabled="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/alarm_after">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/alarm_label_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="@string/enter_purpose"
+            android:inputType="text"
+            android:maxLength="50"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textColorHint="@color/grey_20" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+<!--    repeat on weekdays, weekend, mon tue wed thurs fri-->
+<!--sound-->
+<!--    volume-->
+    <Button
+        android:id="@+id/saveAlarmButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/btn_rounded_accent"
+        android:paddingLeft="@dimen/spacing_xlarge"
+        android:paddingRight="@dimen/spacing_xlarge"
+        android:text="@string/save_alarm"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/alarm_label" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
