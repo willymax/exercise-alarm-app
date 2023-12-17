@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.balysv.materialripple.MaterialRippleLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/RippleStyleBlack"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/spacing_medium"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/alarmTime"
+            android:text="@string/alarm_time"
+            android:textColor="@color/grey_40"
+            android:textSize="20sp"
+            app:fontFamily="sans-serif-medium"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/alarmTime"
+            android:text="@string/alarm_days"
+            android:id="@+id/alarmDayOfWeek"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toEndOf="@id/alarmDayOfWeek"
+            app:layout_constraintEnd_toStartOf="@id/switchAlarm"
+            app:layout_constraintTop_toBottomOf="@id/alarmTime"
+            android:text="@string/alarm_event"
+            android:id="@+id/alarmEvent"
+            />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:checked="true"
+            android:padding="@dimen/spacing_middle"
+            android:id="@+id/switchAlarm"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.balysv.materialripple.MaterialRippleLayout>
