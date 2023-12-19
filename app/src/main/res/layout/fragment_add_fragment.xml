@@ -1,76 +1,292 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="@dimen/spacing_middle"
     tools:context=".AddAlarmFragment">
 
-    <TimePicker
-        android:id="@+id/alarm_time_picker"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/alarm_after"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="@dimen/spacing_middle"
-        android:text="@string/alarm_will_ring"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textColor="@color/grey_90"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/alarm_time_picker" />
-
-    <!--    <View-->
-    <!--        android:id="@+id/lineDivider"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="1px"-->
-    <!--        android:background="@color/grey_90" />-->
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/alarm_label"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_middle"
-        android:background="@color/grey_3"
-        app:hintEnabled="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/alarm_after">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/alarm_label_text"
+        <TimePicker
+            android:id="@+id/alarm_time_picker"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:hint="@string/enter_purpose"
-            android:inputType="text"
-            android:maxLength="50"
-            android:maxLines="1"
-            android:singleLine="true"
-            android:textColorHint="@color/grey_20" />
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    </com.google.android.material.textfield.TextInputLayout>
-<!--    repeat on weekdays, weekend, mon tue wed thurs fri-->
-<!--sound-->
-<!--    volume-->
-    <Button
-        android:id="@+id/saveAlarmButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:background="@drawable/btn_rounded_accent"
-        android:paddingLeft="@dimen/spacing_xlarge"
-        android:paddingRight="@dimen/spacing_xlarge"
-        android:text="@string/save_alarm"
-        android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/alarm_label" />
+        <TextView
+            android:id="@+id/alarm_after"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="@dimen/spacing_middle"
+            android:text="@string/alarm_will_ring_in"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@color/grey_90"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/alarm_time_picker" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/alarm_repeat_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_middle"
+            android:text="@string/alarm_repeat_label"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@color/grey_90"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/alarm_after" />
+
+        <Spinner
+            android:id="@+id/alarm_repeat_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:dropDownVerticalOffset="40dp"
+            android:entries="@array/alarm_repeats"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:padding="@dimen/spacing_middle"
+            android:prompt="@string/alarm_repeat"
+            android:spinnerMode="dropdown"
+            app:layout_constraintBottom_toBottomOf="@id/alarm_repeat_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/alarm_after" />
+        <LinearLayout
+            android:id="@+id/customWeekdays"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_middle"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/alarm_repeat_spinner"
+            >
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/monday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/spacing_middle"
+                android:buttonTint="@color/colorPrimary"
+                android:text="@string/monday" />
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/tuesday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/spacing_middle"
+                android:buttonTint="@color/colorPrimary"
+                android:text="@string/tuesday" />
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/wednesday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/spacing_middle"
+                android:buttonTint="@color/colorPrimary"
+                android:text="@string/wednesday" />
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/thursday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/spacing_middle"
+                android:buttonTint="@color/colorPrimary"
+                android:text="@string/thursday" />
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/friday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/spacing_middle"
+                android:buttonTint="@color/colorPrimary"
+                android:text="@string/friday" />
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/saturday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/spacing_middle"
+                android:buttonTint="@color/colorPrimary"
+                android:text="@string/saturday" />
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/sunday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/spacing_middle"
+                android:buttonTint="@color/colorPrimary"
+                android:text="@string/sunday" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/alarm_activity_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_middle"
+            android:text="@string/alarm_activity_label"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@color/grey_90"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/customWeekdays" />
+
+        <Spinner
+            android:id="@+id/alarm_activity_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/alarm_activities"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:padding="@dimen/spacing_middle"
+            android:prompt="@string/alarm_activity"
+            android:spinnerMode="dropdown"
+            app:layout_constraintBottom_toBottomOf="@id/alarm_activity_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/alarm_activity_label" />
+
+        <TextView
+            android:id="@+id/alarm_activity_count_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_middle"
+            android:text="@string/alarm_activity_count_label"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@color/grey_90"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/alarm_activity_label" />
+
+        <Spinner
+            android:id="@+id/alarm_activity_count_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/alarm_activity_count"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:padding="@dimen/spacing_middle"
+            android:prompt="@string/alarm_activity_count"
+            android:spinnerMode="dropdown"
+            app:layout_constraintBottom_toBottomOf="@id/alarm_activity_count_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/alarm_activity_label" />
+
+        <TextView
+            android:id="@+id/vibrateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_middle"
+            android:text="@string/vibrate"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@color/grey_90"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/alarm_activity_count_label" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/shouldVibrateSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:padding="@dimen/spacing_middle"
+            app:layout_constraintBottom_toBottomOf="@id/vibrateTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/alarm_activity_count_label"
+            app:thumbTint="@color/colorPrimary" />
+        <!--    add field to control alarm sound using slidder-->
+        <TextView
+            android:id="@+id/alarm_sound_level_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/spacing_middle"
+            android:text="@string/alarm_sound"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@color/grey_90"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vibrateTextView" />
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/seekbar_primary_light"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_large"
+            android:max="100"
+            android:progress="20"
+            android:thumb="@drawable/seek_thumb_primary"
+            app:layout_constraintBottom_toBottomOf="@id/alarm_sound_level_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/alarm_sound_level_label"
+            app:layout_constraintTop_toTopOf="@id/alarm_sound_level_label"
+            />
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/alarm_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_middle"
+            app:hintEnabled="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/alarm_sound_level_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/alarm_label_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/enter_label"
+                android:inputType="text"
+                android:maxLength="50"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="@color/grey_100_" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/alarm_goal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_middle"
+            app:hintEnabled="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/alarm_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/alarm_goal_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/enter_goal"
+                android:inputType="text"
+                android:maxLength="50"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="@color/grey_100_" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/saveAlarmButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="@dimen/spacing_middle"
+            android:backgroundTint="@color/colorPrimary"
+            android:padding="@dimen/spacing_middle"
+            android:paddingLeft="@dimen/spacing_xlarge"
+            android:paddingRight="@dimen/spacing_xlarge"
+            android:text="@string/save_alarm"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/alarm_goal"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>
