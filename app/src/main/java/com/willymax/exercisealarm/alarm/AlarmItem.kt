@@ -42,7 +42,8 @@ data class AlarmItem(
 
     private fun calculateDaysRemaining(day: DayOfWeek, hour: Int, minute: Int): Long {
         val now = LocalDateTime.now()
-        var then = now.with(DayOfWeek.from(day)).withHour(hour).withMinute(minute).withSecond(0).withNano(0)
+        var then = now.with(DayOfWeek.from(day)).withHour(hour).withMinute(minute).withSecond(0)
+            .withNano(0)
 
         if (then.isBefore(now) || then.isEqual(now)) {
             then = then.plusWeeks(1)
@@ -50,5 +51,7 @@ data class AlarmItem(
 
         return ChronoUnit.DAYS.between(now, then)
     }
-    override fun toString(): String = "${hour}:${minute}:${daysOfWeek}:${event}:${activity}:${repeats}:${isOn}"
+
+    override fun toString(): String =
+        "${hour}:${minute}:${daysOfWeek}:${event}:${activity}:${repeats}:${isOn}"
 }

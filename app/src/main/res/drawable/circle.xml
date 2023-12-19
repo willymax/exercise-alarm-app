@@ -5,7 +5,7 @@
         <shape android:shape="oval">
 
             <!-- giving the color and width to the stroke -->
-            <stroke android:color="#0F9D58" android:width="3dp"/>
+            <stroke android:color="@color/colorPrimary" android:width="3dp"/>
 
             <!-- giving the width and the height to the shape -->
             <size android:width="120dp" android:height="120dp"/>

@@ -16,7 +16,6 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.google.android.material.snackbar.Snackbar
 import com.willymax.exercisealarm.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -69,12 +68,17 @@ class MainActivity : AppCompatActivity() {
             ) == PackageManager.PERMISSION_GRANTED -> {
                 // You can use the API that requires the permission.
             }
+
             ActivityCompat.shouldShowRequestPermissionRationale(
                 this,
                 Manifest.permission.SCHEDULE_EXACT_ALARM
             ) -> {
-                Log.d(MainActivity::class.simpleName, "permission request shouldShowRequestPermissionRationale")
+                Log.d(
+                    MainActivity::class.simpleName,
+                    "permission request shouldShowRequestPermissionRationale"
+                )
             }
+
             else -> {
                 // You can directly ask for the permission.
                 // The registered ActivityResultCallback gets the result of this request.

@@ -1,14 +1,14 @@
 package com.willymax.exercisealarm
 
 import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.willymax.exercisealarm.placeholder.PlaceholderContent
 import com.willymax.exercisealarm.utils.SharedPreferencesHelper
 
 /**
@@ -39,7 +39,14 @@ class AlarmFragment : Fragment() {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
                 }
-                adapter = MyAlarmRecyclerViewAdapter(SharedPreferencesHelper(requireContext(), "AlarmList").retrieveList("AlarmList"))
+                val retrieveList = SharedPreferencesHelper(
+                    requireContext(),
+                    "AlarmList"
+                ).retrieveList("AlarmList")
+                Log.d("AlarmFragment", "retrieveList: $retrieveList")
+                adapter = MyAlarmRecyclerViewAdapter(
+                    retrieveList
+                )
             }
         }
         return view

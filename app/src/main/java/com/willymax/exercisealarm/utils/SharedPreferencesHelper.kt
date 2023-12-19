@@ -29,6 +29,7 @@ class SharedPreferencesHelper(
             emptyList()
         }
     }
+
     fun updateList(key: String, updateFunction: (List<AlarmItem>) -> List<AlarmItem>) {
         val currentList = retrieveList(key)
         val updateList = updateFunction(currentList)

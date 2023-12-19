@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
@@ -7,6 +8,8 @@
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
 
     <application
         android:allowBackup="true"
@@ -19,9 +22,14 @@
         android:theme="@style/Theme.ExerciseAlarm"
         tools:targetApi="31">
         <service
+            android:name=".alarm.RightOnPlayAndVibrateService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"
+            />
+        <service
             android:name=".services.MyStepCounterService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity
             android:name=".MainActivity"
@@ -37,10 +45,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.willymax.exercisealarm.WalkingActivity"
-            android:exported="false"
-            />
+            android:name=".walking.WalkingActivity"
+            android:exported="false" />
 
-        <receiver android:name=".AlarmReceiver" />
+        <receiver android:name=".receivers.AlarmReceiver" />
     </application>
+
 </manifest>

@@ -1,6 +1,7 @@
-package com.willymax.exercisealarm
+package com.willymax.exercisealarm.walking
 
 import android.content.Context
+import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -12,25 +13,28 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.willymax.exercisealarm.alarm.RightOnPlayAndVibrateService
 import com.willymax.exercisealarm.databinding.FragmentStepCounterBinding
 import com.willymax.exercisealarm.utils.AppConstants
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val NUMBER_OF_STEPS_NEEDED = "numberOfStepsNeeded"
 
 /**
  * A simple [Fragment] subclass.
  * Use the [StepCounterFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+private const val NUMBER_OF_STEPS_NEEDED = "numberOfStepsNeeded"
+private const val PREVIOUS_TOTAL_STEPS = "previousTotalSteps"
+
 class StepCounterFragment : Fragment(), SensorEventListener {
     private var _binding: FragmentStepCounterBinding? = null
     private var sensorManager: SensorManager? = null
-    private var numberOfStepsNeeded: Int? = null
+    private var numberOfStepsNeeded: Int = AppConstants.DEFAULT_NUMBER_OF_STEPS
     private var running = false
     private var totalSteps = 0f
     private var previousTotalSteps = 0f
+
+    private val alpha = 0.8f
+    private val gravity = FloatArray(3)
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -55,6 +59,11 @@ class StepCounterFragment : Fragment(), SensorEventListener {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.tvTargetSteps.text = numberOfStepsNeeded.toString()
+    }
+
     companion object {
         /**
          * Use this factory method to create a new instance of
@@ -63,15 +72,15 @@ class StepCounterFragment : Fragment(), SensorEventListener {
          * @param numberOfSteps Parameter 1.
          * @return A new instance of fragment StepCounterFragment.
          */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(numberOfSteps: String) =
+        fun newInstance(numberOfSteps: Int) =
             StepCounterFragment().apply {
                 arguments = Bundle().apply {
-                    putString(NUMBER_OF_STEPS_NEEDED, numberOfSteps)
+                    putInt(NUMBER_OF_STEPS_NEEDED, numberOfSteps)
                 }
             }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -101,8 +110,19 @@ class StepCounterFragment : Fragment(), SensorEventListener {
         val tvStepsTaken = binding.tvStepsTaken
         if (running && event != null && event.sensor.type == Sensor.TYPE_STEP_COUNTER) {
             totalSteps = event.values[0]
+            if (previousTotalSteps == 0f) {
+                previousTotalSteps = totalSteps
+            }
             val currentSteps = totalSteps.toInt() - previousTotalSteps.toInt()
             tvStepsTaken.text = ("$currentSteps")
+            if (currentSteps >= numberOfStepsNeeded) {
+                val intent = Intent(activity, RightOnPlayAndVibrateService::class.java)
+                activity?.stopService(intent)
+                Toast.makeText(activity, "You have reached your goal", Toast.LENGTH_SHORT).show()
+                tvStepsTaken.text = 0.toString()
+                previousTotalSteps = totalSteps
+                saveData()
+            }
         }
     }
 
@@ -125,16 +145,22 @@ class StepCounterFragment : Fragment(), SensorEventListener {
 
     private fun saveData() {
         val sharedPreferences =
-            requireActivity().getSharedPreferences(AppConstants.STEPS_COUNT_PREFS, Context.MODE_PRIVATE)
+            requireActivity().getSharedPreferences(
+                AppConstants.STEPS_COUNT_PREFS,
+                Context.MODE_PRIVATE
+            )
         val editor = sharedPreferences.edit()
-        editor.putFloat("previousTotalSteps", previousTotalSteps)
+        editor.putFloat(PREVIOUS_TOTAL_STEPS, previousTotalSteps)
         editor.apply()
     }
 
     private fun loadData() {
         val sharedPreferences =
-            requireActivity().getSharedPreferences(AppConstants.STEPS_COUNT_PREFS, Context.MODE_PRIVATE)
-        val savedNumber = sharedPreferences.getFloat("previousTotalSteps", 0f)
+            requireActivity().getSharedPreferences(
+                AppConstants.STEPS_COUNT_PREFS,
+                Context.MODE_PRIVATE
+            )
+        val savedNumber = sharedPreferences.getFloat(PREVIOUS_TOTAL_STEPS, 0f)
         Log.d(StepCounterFragment::class.java.name, "$savedNumber")
         previousTotalSteps = savedNumber
     }

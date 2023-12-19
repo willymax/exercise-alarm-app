@@ -71,7 +71,8 @@ class AddAlarmFragment : Fragment() {
             AddAlarmFragment::class.java.name,
             "Alarm Time: ${SimpleDateFormat("HH:mm").format(calendar.time)} Millis: ${calendar.timeInMillis}"
         )
-        val remainingTime = TimeUtils.getDaysHoursMinutes(TimeUtils.getTimeRemainingInMilliseconds(calendar.timeInMillis))
+        val remainingTime =
+            TimeUtils.getDaysHoursMinutes(TimeUtils.getTimeRemainingInMilliseconds(calendar.timeInMillis))
         if (remainingTime.first > 0) {
             binding.alarmAfter.text =
                 "Alarm Will Ring In ${remainingTime.first} Days"
@@ -90,6 +91,7 @@ class AddAlarmFragment : Fragment() {
             saveExactAlarm()
         }
     }
+
     private fun saveExactAlarm() {
         val newAlarmItem = AlarmItem(
             Date().time.toString(),
@@ -101,7 +103,10 @@ class AddAlarmFragment : Fragment() {
             repeats = true,
             isOn = true
         )
-        Log.d(AddAlarmFragment::class.java.name, "Save Alarm Button Clicked newAlarmItem: $newAlarmItem")
+        Log.d(
+            AddAlarmFragment::class.java.name,
+            "Save Alarm Button Clicked newAlarmItem: $newAlarmItem"
+        )
 
         val sharedPreferencesHelper = SharedPreferencesHelper(requireContext(), "AlarmList")
 

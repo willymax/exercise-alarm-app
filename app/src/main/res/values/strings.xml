@@ -57,4 +57,6 @@
     <string name="enter_purpose">Enter Purpose</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="target_steps">Target Steps</string>
+    <string name="_10000">1000</string>
 </resources>

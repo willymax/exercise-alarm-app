@@ -30,6 +30,9 @@ class MyAlarmRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = values[position]
+        if (item == null) {
+            return
+        }
         holder.alarmTime.text = "${item.hour}:${item.minute}"
         holder.alarmDayOfWeek.text = item.daysOfWeek.joinToString(", ") { dayOfWeek ->
             dayOfWeek.name.substring(0, 3)

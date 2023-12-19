@@ -7,7 +7,7 @@ import android.os.Build
 import com.willymax.exercisealarm.utils.AppConstants
 
 
-class AlarmApplication: Application() {
+class AlarmApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()

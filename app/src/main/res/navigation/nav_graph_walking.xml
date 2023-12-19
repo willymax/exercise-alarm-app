@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/stepCounterFragment"
-        android:name="com.willymax.exercisealarm.StepCounterFragment"
+        android:name="com.willymax.exercisealarm.walking.StepCounterFragment"
         android:label="fragment_step_counter"
         tools:layout="@layout/fragment_step_counter" />
 </navigation>
