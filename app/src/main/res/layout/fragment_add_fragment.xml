@@ -16,7 +16,6 @@
             android:id="@+id/alarm_time_picker"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -240,6 +239,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:hint="@string/enter_label"
+                android:text="@string/alarm_label"
                 android:inputType="text"
                 android:maxLength="50"
                 android:maxLines="1"

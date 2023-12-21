@@ -1,5 +1,6 @@
 package com.willymax.exercisealarm
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -30,9 +31,10 @@ class MyAlarmRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = values[position]
+        Log.d("MyAlarmRecyclerViewAdapter", "item: $item")
         holder.alarmTime.text = "${item.hour}:${item.minute}"
         holder.alarmDayOfWeek.text = item.daysOfWeek.joinToString(", ") { dayOfWeek ->
-            dayOfWeek.name.substring(0, 3)
+            dayOfWeek?.name?.substring(0, 3) ?: ""
         }
         holder.alarmEvent.text = item.event
         holder.switchAlarm.isChecked = true

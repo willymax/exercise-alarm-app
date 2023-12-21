@@ -12,7 +12,7 @@ data class AlarmItem(
     val id: String,
     val hour: Int,// time in 24 hour format
     val minute: Int,// time in 24 hour format
-    val daysOfWeek: MutableList<DayOfWeek> = arrayListOf(DayOfWeek.SUNDAY),// list of days of week
+    val daysOfWeek: MutableList<DayOfWeek?> = arrayListOf(DayOfWeek.SUNDAY),// list of days of week
     val event: String,
     val activity: AlarmActivities,
     val repeats: Boolean,
@@ -27,7 +27,13 @@ data class AlarmItem(
             // create a LocalDateTime object for that day of week
             var alarmTime = LocalDateTime.now(Clock.systemDefaultZone())
             // set the day of week
-            alarmTime = alarmTime.plusDays(calculateDaysRemaining(currentDayOfWeek, hour, minute))
+            alarmTime = alarmTime.plusDays(currentDayOfWeek?.let {
+                calculateDaysRemaining(
+                    it,
+                    hour,
+                    minute
+                )
+            } ?: 0)
             // set the hour and minute
             alarmTime = alarmTime.withHour(hour)
             alarmTime = alarmTime.withMinute(minute)

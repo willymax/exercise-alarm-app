@@ -53,7 +53,7 @@
     <string name="default_alarm_time">08:00:00</string>
     <string name="alarm_activity">Walking</string>
     <string name="alarm_will_ring_in">Alarm Will Ring In: %1$s</string>
-    <string name="alarm_label">Label</string>
+    <string name="alarm_label">Make the best out of the day</string>
     <string name="enter_label">Alarm Label</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -74,4 +74,7 @@
     <string name="saturday">Saturday</string>
     <string name="sunday">Sunday</string>
     <string name="enter_goal">Enter your #1 morning goal</string>
+    <string name="permission_denied">Permission Denied</string>
+    <string name="DENY">DENY</string>
+    <string name="ALLOW">ALLOW</string>
 </resources>

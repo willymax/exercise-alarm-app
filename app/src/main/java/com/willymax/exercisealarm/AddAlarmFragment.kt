@@ -51,31 +51,32 @@ class AddAlarmFragment : Fragment() {
     ): View {
         _binding = FragmentAddFragmentBinding.inflate(inflater, container, false)
         binding.alarmTimePicker.setIs24HourView(true)
-        binding.alarmTimePicker.setOnTimeChangedListener { view, hourOfDay, minute ->
+        binding.alarmTimePicker.setOnTimeChangedListener { _, _, _ ->
             run {
                 updateRemainingTime()
             }
         }
         binding.alarmRepeatSpinner.setSelection(0)
-        binding.alarmRepeatSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                if ("Custom" == parent?.getItemAtPosition(position)) {
-                    binding.customWeekdays.visibility = View.VISIBLE
-                } else {
-                    binding.customWeekdays.visibility = View.GONE
+        binding.alarmRepeatSpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    if ("Custom" == parent?.getItemAtPosition(position)) {
+                        binding.customWeekdays.visibility = View.VISIBLE
+                    } else {
+                        binding.customWeekdays.visibility = View.GONE
+                    }
+                    updateRemainingTime()
                 }
-                updateRemainingTime()
-            }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    TODO("Not yet implemented")
+                }
             }
-        }
         updateRemainingTime()
         return binding.root
     }
@@ -107,10 +108,12 @@ class AddAlarmFragment : Fragment() {
                 remainingTime =
                     TimeUtils.getDaysHoursMinutes(TimeUtils.getTimeRemainingInMilliseconds(calendar.timeInMillis))
             }
+
             "Everyday" -> {
                 remainingTime =
                     TimeUtils.getDaysHoursMinutes(TimeUtils.getTimeRemainingInMilliseconds(calendar.timeInMillis))
             }
+
             "Weekdays" -> {
                 // if the alarm is set to repeat on weekdays, then calculate the remaining time based on the next weekday
                 val currentDayOfWeek = LocalDate.now().dayOfWeek
@@ -124,10 +127,11 @@ class AddAlarmFragment : Fragment() {
                     DayOfWeek.SUNDAY -> 1
                     else -> 1
                 }
-                 calendar.add(Calendar.DAY_OF_MONTH, daysUntilNextWeekday)
+                calendar.add(Calendar.DAY_OF_MONTH, daysUntilNextWeekday)
                 remainingTime =
                     TimeUtils.getDaysHoursMinutes(TimeUtils.getTimeRemainingInMilliseconds(calendar.timeInMillis))
             }
+
             "Weekends" -> {
                 // if the alarm is set to repeat on weekends, then calculate the remaining time based on the next weekend
                 val currentDayOfWeek = LocalDate.now().dayOfWeek
@@ -150,6 +154,7 @@ class AddAlarmFragment : Fragment() {
                 remainingTime =
                     TimeUtils.getDaysHoursMinutes(TimeUtils.getTimeRemainingInMilliseconds(calendar.timeInMillis))
             }
+
             "Custom" -> {
                 // is there a way to group checkboxes together? if so, then get the selected checkboxes and calculate the remaining time based on the next day the alarm will ring
 

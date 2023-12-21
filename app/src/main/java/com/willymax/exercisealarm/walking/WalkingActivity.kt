@@ -12,6 +12,7 @@ class WalkingActivity : AppCompatActivity() {
         private const val TAG = "WalkingActivity"
         const val EXTRA_STEP_COUNT = "extra_step_count"
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityWalkingBinding.inflate(layoutInflater)
@@ -20,8 +21,17 @@ class WalkingActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             val stepCount = intent.getIntExtra(EXTRA_STEP_COUNT, 100)
             supportFragmentManager.beginTransaction()
-                .replace(R.id.nav_host_fragment_content_main, StepCounterFragment.newInstance(stepCount))
+                .replace(
+                    R.id.nav_host_fragment_content_main,
+                    StepCounterFragment.newInstance(stepCount)
+                )
                 .commitNow()
         }
+        // check if user has allowed location permission
+
+        // if not, request for it
+        // if yes, start location updates
+        // if location updates are already running, do nothing
+
     }
 }

@@ -1,12 +1,10 @@
 package com.willymax.exercisealarm.alarm
 
 import android.app.ForegroundServiceStartNotAllowedException
-import android.app.IntentService
 import android.app.PendingIntent
 import android.app.Service
-import android.content.ComponentName
-import android.content.Intent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.media.MediaPlayer
 import android.media.RingtoneManager
@@ -14,6 +12,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.willymax.exercisealarm.R
@@ -30,7 +29,7 @@ private const val EXTRA_PARAM1 = "com.willymax.exercisealarm.alarm.extra.PARAM1"
 private const val EXTRA_PARAM2 = "com.willymax.exercisealarm.alarm.extra.PARAM2"
 
 /**
- * An [IntentService] subclass for handling asynchronous task requests in
+ * An subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
 
  * TODO: Customize class - update intent actions, extra parameters and static
@@ -59,10 +58,7 @@ class RightOnPlayAndVibrateService : Service() {
         }
         mediaPlayer?.isLooping = true
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-    }
 
-    // onStartCommand is called when the service is started
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
             val channelId = AppConstants.ALARM_CHANNEL_ID
             val notification = NotificationCompat.Builder(this, channelId)
@@ -80,12 +76,13 @@ class RightOnPlayAndVibrateService : Service() {
                         Intent(this, AlarmReceiver::class.java).apply {
                             action = AppConstants.ACTION_STOP_ALARM
                         },
-                        PendingIntent.FLAG_UPDATE_CURRENT
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
                 )
                 .build()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                this.startForeground(
+                Log.d("RightOnPlayAndVibrateService", "startForeground with foregroundServiceType")
+                startForeground(
                     /* id = */ 1,
                     /* notification = */ notification,
                     /* foregroundServiceType = */
@@ -96,19 +93,32 @@ class RightOnPlayAndVibrateService : Service() {
                     }
                 )
             } else {
-                this.startForeground(
+                Log.d(
+                    "RightOnPlayAndVibrateService",
+                    "startForeground without foregroundServiceType"
+                )
+                startForeground(
                     /* id = */ 1,
                     /* notification = */ notification
                 )
             }
         } catch (e: Exception) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                && e is ForegroundServiceStartNotAllowedException) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && e is ForegroundServiceStartNotAllowedException) {
                 // App not in a valid state to start foreground service
                 // (e.g. started from bg)
+                Log.e(
+                    "RightOnPlayAndVibrateService",
+                    "App not in a valid state to start foreground service ${e.message}"
+                )
+            } else {
+                Log.e("RightOnPlayAndVibrateService", "startForegroundService failed ${e.message}")
             }
             // ...
         }
+    }
+
+    // onStartCommand is called when the service is started
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_PLAY_RINGTONE -> {
                 val param1 = intent.getStringExtra(EXTRA_PARAM1)
@@ -125,11 +135,13 @@ class RightOnPlayAndVibrateService : Service() {
         }
         return START_NOT_STICKY
     }
+
     override fun onDestroy() {
         super.onDestroy()
         mediaPlayer?.release()
         vibrator.cancel()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        Log.d("RightOnPlayAndVibrateService", "onDestroy")
     }
 
     /**
@@ -138,7 +150,8 @@ class RightOnPlayAndVibrateService : Service() {
      */
     private fun handleActionPlayRingtone(param1: String?, param2: String?) {
         // continue playing the ringtone until the user stops it
-        mediaPlayer?.start()
+//        TODO: mediaPlayer?.start()
+//        mediaPlayer?.start()
     }
 
     /**
@@ -160,7 +173,6 @@ class RightOnPlayAndVibrateService : Service() {
          * Starts this service to perform action Foo with the given parameters. If
          * the service is already performing a task this action will be queued.
          *
-         * @see IntentService
          */
         // TODO: Customize helper method
         @JvmStatic
@@ -170,14 +182,13 @@ class RightOnPlayAndVibrateService : Service() {
                 putExtra(EXTRA_PARAM1, param1)
                 putExtra(EXTRA_PARAM2, param2)
             }
-            context.startForegroundService(intent)
+            context.startService(intent)
         }
 
         /**
          * Starts this service to perform action Baz with the given parameters. If
          * the service is already performing a task this action will be queued.
          *
-         * @see IntentService
          */
         // TODO: Customize helper method
         @JvmStatic
@@ -187,7 +198,7 @@ class RightOnPlayAndVibrateService : Service() {
                 putExtra(EXTRA_PARAM1, param1)
                 putExtra(EXTRA_PARAM2, param2)
             }
-            context.startForegroundService(intent)
+            context.startService(intent)
         }
     }
 }
