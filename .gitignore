@@ -39,3 +39,4 @@ render.experimental.xml
 google-services.json
 # Android Profiling
 *.hprof
+/apikey.properties

@@ -2,6 +2,8 @@ package com.willymax.exercisealarm.utils
 
 class AppConstants {
     companion object {
+        const val SELECTED_RINGTONE: String = "SELECTED_RINGTONE"
+        const val SELECTED_RINGTONE_FROM: String = "SELECTED_RINGTONE_FROM"
         const val ACTION_START_ALARM: String = "com.willymax.exercisealarm.alarm.action.START_ALARM"
         const val ACTION_STOP_ALARM: String = "com.willymax.exercisealarm.alarm.action.STOP_ALARM"
         const val ALARM_CHANNEL_ID: String = "alarm_channel_id"

@@ -1,6 +1,7 @@
 package com.willymax.exercisealarm.alarm
 
 import android.util.Log
+import com.willymax.exercisealarm.AddAlarmFragment
 import com.willymax.exercisealarm.utils.AlarmActivities
 import java.time.Clock
 import java.time.DayOfWeek
@@ -16,7 +17,9 @@ data class AlarmItem(
     val event: String,
     val activity: AlarmActivities,
     val repeats: Boolean,
-    val isOn: Boolean
+    val isOn: Boolean,
+    val selectedRingtone: String?,
+    val selectedRingtoneFrom: AddAlarmFragment.Companion.RingtoneFrom
 ) {
     // calculate alarm time and return it
     fun getTheAlarmTimes(): List<LocalDateTime> {

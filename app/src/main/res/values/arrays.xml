@@ -43,4 +43,9 @@
         <item>Weekends</item>
         <item>Custom</item>
     </string-array>
+    <string-array name="alarm_ringtone_song" >
+        <item>Default</item>
+        <item>Select From Device</item>
+        <item>Select From Spotify</item>
+    </string-array>
 </resources>

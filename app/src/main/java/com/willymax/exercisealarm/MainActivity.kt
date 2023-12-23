@@ -18,6 +18,14 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import com.willymax.exercisealarm.databinding.ActivityMainBinding
 import com.willymax.exercisealarm.utils.PermissionUtil
 
+import com.spotify.android.appremote.api.ConnectionParams;
+import com.spotify.android.appremote.api.Connector;
+import com.spotify.android.appremote.api.SpotifyAppRemote;
+
+import com.spotify.protocol.client.Subscription;
+import com.spotify.protocol.types.PlayerState;
+import com.spotify.protocol.types.Track;
+
 private const val REQUEST_CODE_ACTIVITY_RECOGNITION = 1000
 
 private val activityPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -172,5 +180,18 @@ class MainActivity : AppCompatActivity() {
     private fun disableActivityTrackingFeatures() {
         // Disable features that require activity tracking
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // We will start writing our code here.
+    }
+
+    private fun connected() {
+        // Then we will write some more code here.
+    }
+    override fun onStop() {
+        super.onStop()
+        // Aaand we will finish off here.
     }
 }

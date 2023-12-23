@@ -1,12 +1,15 @@
+import java.util.*
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
-
+val apikeyPropertiesFile = Properties().apply {
+    load(rootProject.file("apikey.properties").inputStream())
+}
 android {
     namespace = "com.willymax.exercisealarm"
     compileSdk = 34
-
     defaultConfig {
         applicationId = "com.willymax.exercisealarm"
         minSdk = 26
@@ -15,6 +18,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // read from apikey.properties file
+        buildConfigField("String", "SPOTIFY_CLIENT_SECRET", "\"${apikeyPropertiesFile.getProperty("SPOTIFY_CLIENT_SECRET")}\"")
+        buildConfigField("String", "SPOTIFY_CLIENT_ID", "\"${apikeyPropertiesFile.getProperty("SPOTIFY_CLIENT_ID")}\"")
+        buildConfigField("String", "SPOTIFY_REDIRECT_URI", "\"${apikeyPropertiesFile.getProperty("SPOTIFY_REDIRECT_URI")}\"")
     }
 
     buildTypes {
@@ -49,6 +56,8 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation(files("libs/spotify-auth-release-2.1.0.aar"))
+    implementation(files("libs/spotify-app-remote-release-0.8.0.aar"))
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

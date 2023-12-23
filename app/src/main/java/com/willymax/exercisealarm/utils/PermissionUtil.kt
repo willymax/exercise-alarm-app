@@ -49,6 +49,12 @@ object PermissionUtil {
         }
         return true
     }
+    fun isPermissionGranted(activity: Activity?, permission: String?): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            activity!!,
+            permission!!
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 
     fun getDeniedPermission(act: Activity): Array<String> {
         val permissions: MutableList<String> = ArrayList()

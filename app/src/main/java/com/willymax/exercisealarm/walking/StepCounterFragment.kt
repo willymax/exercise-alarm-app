@@ -107,8 +107,10 @@ class StepCounterFragment : Fragment(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
+        Log.d(StepCounterFragment::class.java.name, "onSensorChanged")
         val tvStepsTaken = binding.tvStepsTaken
         if (running && event != null && event.sensor.type == Sensor.TYPE_STEP_COUNTER) {
+            Log.d(StepCounterFragment::class.java.name, "onSensorChanged: TYPE_STEP_COUNTER")
             totalSteps = event.values[0]
             if (previousTotalSteps == 0f) {
                 previousTotalSteps = totalSteps

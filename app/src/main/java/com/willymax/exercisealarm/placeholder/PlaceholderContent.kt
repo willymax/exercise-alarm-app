@@ -1,5 +1,6 @@
 package com.willymax.exercisealarm.placeholder
 
+import com.willymax.exercisealarm.AddAlarmFragment
 import com.willymax.exercisealarm.alarm.AlarmItem
 import com.willymax.exercisealarm.utils.AlarmActivities
 import java.time.DayOfWeek
@@ -53,8 +54,10 @@ object PlaceholderContent {
             arrayListOf(daysOfWeek[0], daysOfWeek[2]),
             "Meditate",
             AlarmActivities.WALKING,
-            true,
-            true
+            repeats = true,
+            isOn = true,
+            selectedRingtone = "",
+            selectedRingtoneFrom = AddAlarmFragment.Companion.RingtoneFrom.DEFAULT
         )
     }
 

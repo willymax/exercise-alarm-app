@@ -9,11 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.willymax.exercisealarm.alarm.AlarmItem
-import com.willymax.exercisealarm.alarm.AlarmSchedulerImpl
-import com.willymax.exercisealarm.utils.AlarmActivities
 import com.willymax.exercisealarm.utils.SharedPreferencesHelper
-import java.time.LocalDate
 import java.util.Calendar
 
 /**
@@ -49,24 +45,24 @@ class AlarmFragment : Fragment() {
                     "AlarmList"
                 ).retrieveList("AlarmList")
 
-                val alarmItems = mutableListOf<AlarmItem>()
-                alarmItems.addAll(retrieveList)
-                val temp = AlarmItem(
-                    calendar.time.toString(),
-                    calendar.get(Calendar.HOUR_OF_DAY),
-                    calendar.get(Calendar.MINUTE) + 1,
-                    arrayListOf(LocalDate.now().dayOfWeek),
-                    "Wake up",
-                    AlarmActivities.WALKING,
-                    repeats = true,
-                    isOn = true
-                )
-                // TODO: delete this
-                AlarmSchedulerImpl(requireActivity()).scheduleAlarm(temp)
-                alarmItems.add(temp)
-                Log.d("AlarmFragment", "retrieveList: $alarmItems")
+//                val alarmItems = mutableListOf<AlarmItem>()
+//                alarmItems.addAll(retrieveList)
+//                val temp = AlarmItem(
+//                    calendar.time.toString(),
+//                    calendar.get(Calendar.HOUR_OF_DAY),
+//                    calendar.get(Calendar.MINUTE) + 1,
+//                    arrayListOf(LocalDate.now().dayOfWeek),
+//                    "Wake up",
+//                    AlarmActivities.WALKING,
+//                    repeats = true,
+//                    isOn = true
+//                )
+//                // TODO: delete this
+//                AlarmSchedulerImpl(requireActivity()).scheduleAlarm(temp)
+//                alarmItems.add(temp)
+                Log.d("AlarmFragment", "retrieveList: $retrieveList")
                 adapter = MyAlarmRecyclerViewAdapter(
-                    alarmItems
+                    retrieveList
                 )
             }
         }

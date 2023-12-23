@@ -29,6 +29,8 @@ class AlarmSchedulerImpl(private val context: Context) : AlarmScheduler {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra(AppConstants.ALARM_ACTIVITY, alarmItem.activity.name)
             putExtra(AppConstants.ALARM_EVENT, alarmItem.event)
+            putExtra(AppConstants.SELECTED_RINGTONE, alarmItem.selectedRingtone)
+            putExtra(AppConstants.SELECTED_RINGTONE_FROM, alarmItem.selectedRingtoneFrom.name)
             action = AppConstants.ACTION_START_ALARM
         }
         // for each alarm time
