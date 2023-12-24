@@ -18,10 +18,21 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // add manifestPlaceholders for spotify client id and secret
+        manifestPlaceholders["redirectSchemeName"] = "http"
+        manifestPlaceholders["redirectHostName"] = "com.willymax.exercisealarm"
+
         // read from apikey.properties file
-        buildConfigField("String", "SPOTIFY_CLIENT_SECRET", "\"${apikeyPropertiesFile.getProperty("SPOTIFY_CLIENT_SECRET")}\"")
-        buildConfigField("String", "SPOTIFY_CLIENT_ID", "\"${apikeyPropertiesFile.getProperty("SPOTIFY_CLIENT_ID")}\"")
-        buildConfigField("String", "SPOTIFY_REDIRECT_URI", "\"${apikeyPropertiesFile.getProperty("SPOTIFY_REDIRECT_URI")}\"")
+        buildConfigField("String", "SPOTIFY_CLIENT_SECRET",
+            apikeyPropertiesFile.getProperty("SPOTIFY_CLIENT_SECRET")
+        )
+        buildConfigField("String", "SPOTIFY_CLIENT_ID",
+            apikeyPropertiesFile.getProperty("SPOTIFY_CLIENT_ID")
+        )
+        buildConfigField("String", "SPOTIFY_REDIRECT_URI",
+            apikeyPropertiesFile.getProperty("SPOTIFY_REDIRECT_URI")
+        )
     }
 
     buildTypes {
@@ -67,4 +78,6 @@ dependencies {
     implementation("com.wdullaer:materialdatetimepicker:4.2.3")         // date & time picker
     implementation("com.balysv:material-ripple:1.0.2")
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("com.google.code.gson:gson:2.8.6")
 }

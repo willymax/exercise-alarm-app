@@ -1,5 +1,6 @@
 package com.willymax.exercisealarm
 
+import android.Manifest
 import android.app.Activity
 import android.app.AlarmManager
 import android.content.ActivityNotFoundException
@@ -9,13 +10,16 @@ import android.content.pm.PackageManager
 import android.hardware.SensorManager
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -23,6 +27,10 @@ import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.protocol.types.Track
+import com.spotify.sdk.android.auth.AccountsQueryParameters.CLIENT_ID
+import com.spotify.sdk.android.auth.AuthorizationClient
+import com.spotify.sdk.android.auth.AuthorizationRequest
+import com.spotify.sdk.android.auth.AuthorizationResponse
 import com.willymax.exercisealarm.alarm.AlarmItem
 import com.willymax.exercisealarm.alarm.AlarmSchedulerImpl
 import com.willymax.exercisealarm.databinding.FragmentAddFragmentBinding
@@ -40,20 +48,43 @@ import java.util.Locale
 
 
 const val REQUEST_CODE_READ_EXTERNAL_STORAGE = 1001
+
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
  */
 class AddAlarmFragment : Fragment() {
 
+    private lateinit var registerForActivityResultRingtone: ActivityResultLauncher<Int>
     private var _binding: FragmentAddFragmentBinding? = null
     private var sensorManager: SensorManager? = null
     private var alarmManager: AlarmManager? = null
-    var spotifyClientId: String = BuildConfig.SPOTIFY_CLIENT_ID
-    var spotifyRedirectUri: String = BuildConfig.SPOTIFY_REDIRECT_URI
+    private var spotifyClientId: String = BuildConfig.SPOTIFY_CLIENT_ID
+    private var spotifyRedirectUri: String = BuildConfig.SPOTIFY_REDIRECT_URI
     private var spotifyAppRemote: SpotifyAppRemote? = null
+
     // a variable to hold the selected ringtone and from where
     private var selectedRingtone: String? = null
-   private var selectedRingtoneFrom: RingtoneFrom = RingtoneFrom.DEFAULT
+    private var selectedRingtoneFrom: RingtoneFrom = RingtoneFrom.DEFAULT
+
+
+    private val readMediaAudioPermission =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_AUDIO
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            // PERMISSION GRANTED
+            openFileExplorer()
+        } else {
+            // PERMISSION NOT GRANTED
+        }
+    }
+
     companion object {
         enum class RingtoneFrom {
             DEFAULT, CUSTOM, SPOTIFY
@@ -69,6 +100,58 @@ class AddAlarmFragment : Fragment() {
         super.onCreate(savedInstanceState)
         sensorManager = activity?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         alarmManager = activity?.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+
+        try {
+            class PickRingtone : ActivityResultContract<Int, Uri?>() {
+                override fun createIntent(context: Context, ringtoneType: Int) =
+                    Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+                        putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, ringtoneType)
+                    }
+
+                override fun parseResult(resultCode: Int, result: Intent?): Uri? {
+                    if (resultCode != Activity.RESULT_OK) {
+                        return null
+                    }
+                    return result?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+                }
+            }
+
+            registerForActivityResultRingtone = registerForActivityResult(PickRingtone()) {
+                // do something with the result
+                Log.d(
+                    AddAlarmFragment::class.java.name,
+                    "Ringtone Selected: $it"
+                )
+                selectedRingtone = it?.toString()
+            }
+        } catch (ex: ActivityNotFoundException) {
+            // Potentially direct the user to the Market with a Dialog
+            AppUtils.showMessageDialog(
+                requireActivity(),
+                "File Manager Not Found",
+                "Please install a File Manager.",
+                "Install",
+                "Cancel",
+                { dialogInterface, i ->
+                    run {
+                        // redirect to play store
+                        val branchLink =
+                            Uri.encode("https://spotify.link/content_linking?~campaign=" + requireContext().packageName);
+                        val appPackageName = "com.spotify.music";
+                        val referrer = "_branch_link=$branchLink";
+                        AppUtils.redirectUserToPlayStore(
+                            requireActivity(),
+                            appPackageName,
+                            referrer
+                        )
+                    }
+                },
+                { dialogInterface, i ->
+                    // do nothing
+                }
+            )
+        }
     }
 
     override fun onCreateView(
@@ -77,11 +160,7 @@ class AddAlarmFragment : Fragment() {
     ): View {
         _binding = FragmentAddFragmentBinding.inflate(inflater, container, false)
         binding.alarmTimePicker.setIs24HourView(true)
-        binding.alarmTimePicker.setOnTimeChangedListener { _, _, _ ->
-            run {
-                updateRemainingTime()
-            }
-        }
+        binding.alarmTimePicker.setOnTimeChangedListener { _, _, _ -> updateRemainingTime() }
         binding.alarmRepeatSpinner.setSelection(0)
         binding.alarmRepeatSpinner.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
@@ -110,9 +189,12 @@ class AddAlarmFragment : Fragment() {
                     view: View?,
                     position: Int,
                     id: Long
-                ) {}
-                override fun onNothingSelected(parent: AdapterView<*>?) {
+                ) {
                     onRingtoneSongSelected()
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    // do nothing
                 }
             }
         updateRemainingTime()
@@ -120,17 +202,35 @@ class AddAlarmFragment : Fragment() {
     }
 
     private fun onRingtoneSongSelected() {
-        val selectedItem = binding.alarmRingtoneSongSpinner.selectedItem
-        if (selectedItem == "Custom") {
-            selectedRingtoneFrom = RingtoneFrom.CUSTOM
-            // play custom music
-            selectCustomAlarmRingtoneFromDevice()
-        } else if (selectedItem == "Spotify") {
-            selectedRingtoneFrom = RingtoneFrom.SPOTIFY
-            spotifySelected();
-        } else {
-            selectedRingtoneFrom = RingtoneFrom.DEFAULT
-            // play default music
+        Log.d(
+            AddAlarmFragment::class.java.name,
+            "Ringtone Song Type Selected: ${binding.alarmRingtoneSongSpinner.selectedItem}"
+        )
+
+        when (binding.alarmRingtoneSongSpinner.selectedItem.toString()) {
+            "Select From Device" -> {
+                selectedRingtoneFrom = RingtoneFrom.CUSTOM
+                // play custom music
+                Log.d(
+                    AddAlarmFragment::class.java.name,
+                    "Select From Device Selected"
+                )
+                selectCustomAlarmRingtoneFromDevice()
+            }
+
+            "Select From Spotify" -> {
+                Log.d(
+                    AddAlarmFragment::class.java.name,
+                    "Select From Spotify Selected"
+                )
+                selectedRingtoneFrom = RingtoneFrom.SPOTIFY
+                spotifySelected();
+            }
+
+            else -> {
+                selectedRingtoneFrom = RingtoneFrom.DEFAULT
+                // play default music
+            }
         }
     }
 
@@ -143,35 +243,48 @@ class AddAlarmFragment : Fragment() {
      */
     private fun selectCustomAlarmRingtoneFromDevice() {
         // check if user has granted permission to read external storage
-        val activityPermission = android.Manifest.permission.READ_EXTERNAL_STORAGE
-        if (PermissionUtil.isGranted(requireContext(), activityPermission)) {
+        if (PermissionUtil.isGranted(requireContext(), readMediaAudioPermission)) {
             // open file explorer
             openFileExplorer()
         } else {
             Log.d(
                 MainActivity::class.simpleName,
-                "Permission is not granted $activityPermission"
+                "Permission is not granted $readMediaAudioPermission"
             )
             // Permission is not granted
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(
                     requireActivity(),
-                    activityPermission
+                    readMediaAudioPermission
                 )
             ) {
+                Manifest.permission.READ_EXTERNAL_STORAGE
+                Log.d(
+                    MainActivity::class.simpleName,
+                    "Should show request permission rationale $readMediaAudioPermission"
+                )
                 // Show an explanation to the user asynchronously
                 PermissionUtil.showConfirmDialog(
-                    requireActivity(), "Read External Storage Permission",
-                    "This app needs read external storage permission to select custom alarm ringtone",
-                    arrayOf(activityPermission), REQUEST_CODE_READ_EXTERNAL_STORAGE
-                )
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(
                     requireActivity(),
-                    arrayOf(activityPermission),
-                    REQUEST_CODE_READ_EXTERNAL_STORAGE
+                    "Read External Storage Permission",
+                    "This app needs read external storage permission to select custom alarm ringtone",
+                    { dialogInterface, i ->
+                        run {
+                            requestPermissionLauncher.launch(readMediaAudioPermission)
+                        }
+                    }
+                ) { dialogInterface, i ->
+                    run {
+
+                    }
+                }
+            } else {
+                Log.d(
+                    MainActivity::class.simpleName,
+                    "Requesting permission $readMediaAudioPermission"
                 )
+                // No explanation needed, we can request the permission.
+                requestPermissionLauncher.launch(readMediaAudioPermission)
             }
         }
     }
@@ -180,53 +293,7 @@ class AddAlarmFragment : Fragment() {
 //        val intent = Intent(Intent.ACTION_GET_CONTENT)
 //        intent.type = "audio/*"
 //        intent.addCategory(Intent.CATEGORY_OPENABLE)
-        try {
-            class PickRingtone : ActivityResultContract<Int, Uri?>() {
-                override fun createIntent(context: Context, ringtoneType: Int) =
-                    Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
-                        putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, ringtoneType)
-                    }
-
-                override fun parseResult(resultCode: Int, result: Intent?) : Uri? {
-                    if (resultCode != Activity.RESULT_OK) {
-                        return null
-                    }
-                    return result?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
-                }
-            }
-            registerForActivityResult(PickRingtone()) {
-                // do something with the result
-                Log.d(
-                    AddAlarmFragment::class.java.name,
-                    "Ringtone Selected: $it"
-                )
-                selectedRingtone = it?.toString()
-            }
-        } catch (ex: ActivityNotFoundException) {
-            // Potentially direct the user to the Market with a Dialog
-            AppUtils.showMessageDialog(
-                requireActivity(),
-                "File Manager Not Found",
-                "Please install a File Manager.",
-                "Install",
-                "Cancel",
-                { dialogInterface, i -> run {
-                    // redirect to play store
-                    val branchLink = Uri.encode("https://spotify.link/content_linking?~campaign=" + requireContext().packageName);
-                    val appPackageName = "com.spotify.music";
-                    val referrer = "_branch_link=$branchLink";
-                    AppUtils.redirectUserToPlayStore(
-                        requireActivity(),
-                        appPackageName,
-                        referrer
-                    )
-                }
-                },
-                { dialogInterface, i ->
-                    // do nothing
-                }
-            )
-        }
+        registerForActivityResultRingtone.launch(RingtoneManager.TYPE_ALARM)
     }
 
     /**
@@ -249,7 +316,6 @@ class AddAlarmFragment : Fragment() {
      */
 
 
-
     private fun spotifySelected() {
         // play spotify music
 
@@ -269,17 +335,19 @@ class AddAlarmFragment : Fragment() {
                 "Please install Spotify from the Play Store",
                 "Install",
                 "Cancel",
-                { dialogInterface, i -> run {
-                    // redirect to play store
-                    val branchLink = Uri.encode("https://spotify.link/content_linking?~campaign=" + requireContext().packageName);
-                    val appPackageName = "com.spotify.music";
-                    val referrer = "_branch_link=$branchLink";
-                    AppUtils.redirectUserToPlayStore(
-                        requireActivity(),
-                        appPackageName,
-                        referrer
-                    )
-                }
+                { dialogInterface, i ->
+                    run {
+                        // redirect to play store
+                        val branchLink =
+                            Uri.encode("https://spotify.link/content_linking?~campaign=" + requireContext().packageName);
+                        val appPackageName = "com.spotify.music";
+                        val referrer = "_branch_link=$branchLink";
+                        AppUtils.redirectUserToPlayStore(
+                            requireActivity(),
+                            appPackageName,
+                            referrer
+                        )
+                    }
                 },
                 { dialogInterface, i ->
                     // do nothing
@@ -291,27 +359,44 @@ class AddAlarmFragment : Fragment() {
     private fun authorizeSpotify() {
         // authorize app
         // Set the connection parameters
-        val connectionParams = ConnectionParams.Builder(spotifyClientId)
-            .setRedirectUri(spotifyRedirectUri)
-            .showAuthView(true)
-            .build()
-        // Authorizing user with Single Sign-On library
-        SpotifyAppRemote.connect(requireContext(), connectionParams, object : Connector.ConnectionListener {
-            override fun onConnected(p0: SpotifyAppRemote?) {
-                spotifyAppRemote = p0
-                Log.d(AddAlarmFragment::class.java.name, "Connected! Yay!")
-                // Now you can start interacting with App Remote
-                spotifyConnected()
-            }
+//        val connectionParams = ConnectionParams.Builder(spotifyClientId)
+//            .setRedirectUri(spotifyRedirectUri)
+//            .showAuthView(true)
+//            .build()
+//        // Authorizing user with Single Sign-On library
+//        SpotifyAppRemote.connect(
+//            requireContext(),
+//            connectionParams,
+//            object : Connector.ConnectionListener {
+//                override fun onConnected(p0: SpotifyAppRemote?) {
+//                    spotifyAppRemote = p0
+//                    Log.d(AddAlarmFragment::class.java.name, "Connected Spotify! Yay!")
+//                    // Now you can start interacting with App Remote
+//                    spotifyConnected()
+//                }
+//
+//                override fun onFailure(p0: Throwable?) {
+//                    Log.d(AddAlarmFragment::class.java.name, "Failed Spotify! Yay!")
+//                    Log.e(AddAlarmFragment::class.java.name, p0?.message, p0)
+//                    // Something went wrong when attempting to connect! Handle errors here
+//                }
+//            })
 
-            override fun onFailure(p0: Throwable?) {
-                Log.e(AddAlarmFragment::class.java.name, p0?.message, p0)
-                // Something went wrong when attempting to connect! Handle errors here
-            }
-        })
+        val REQUEST_CODE = 1337
+        val REDIRECT_URI = "http://com.willymax.exercisealarm/callback"
+
+        val builder =
+            AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
+
+        builder.setScopes(arrayOf("streaming"))
+        val request = builder.build()
+
+        AuthorizationClient.openLoginActivity(requireActivity(), REQUEST_CODE, request)
     }
+
     private fun spotifyConnected() {
         selectedRingtone = "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M"
+        // play music
         spotifyAppRemote?.playerApi?.subscribeToPlayerState()?.setEventCallback { playerState ->
             val track: Track? = playerState.track
             if (track != null) {
@@ -461,4 +546,5 @@ class AddAlarmFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
 }

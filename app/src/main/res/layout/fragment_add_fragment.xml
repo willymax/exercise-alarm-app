@@ -185,6 +185,7 @@
             android:padding="@dimen/spacing_middle"
             android:prompt="@string/alarm_ringtone_song"
             android:spinnerMode="dropdown"
+            android:textAlignment="textEnd"
             app:layout_constraintBottom_toBottomOf="@id/alarm_ringtone_song_label"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/alarm_activity_count_label" />

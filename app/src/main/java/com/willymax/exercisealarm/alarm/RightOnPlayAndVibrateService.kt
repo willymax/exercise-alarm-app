@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.media.MediaPlayer
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.os.VibrationEffect
@@ -15,12 +16,12 @@ import android.os.Vibrator
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import com.spotify.android.appremote.api.SpotifyAppRemote
+import com.willymax.exercisealarm.AddAlarmFragment
 import com.willymax.exercisealarm.R
 import com.willymax.exercisealarm.receivers.AlarmReceiver
 import com.willymax.exercisealarm.utils.AppConstants
 
-// Choose action names that describe tasks that this
-// Service can perform, e.g. ACTION_FETCH_NEW_ITEMS
 private const val ACTION_PLAY_RINGTONE = "com.willymax.exercisealarm.alarm.action.PLAY_RINGTONE"
 private const val ACTION_VIBRATE = "com.willymax.exercisealarm.alarm.action.VIBRATE"
 
@@ -39,6 +40,7 @@ private const val EXTRA_PARAM2 = "com.willymax.exercisealarm.alarm.extra.PARAM2"
 class RightOnPlayAndVibrateService : Service() {
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var vibrator: Vibrator
+    private var spotifyAppRemote: SpotifyAppRemote? = null
 
     // onBind is called when the service is bound to an activity
     // this is not needed for this service
@@ -50,15 +52,6 @@ class RightOnPlayAndVibrateService : Service() {
     // onCreate is called when the service is created
     override fun onCreate() {
         super.onCreate()
-        mediaPlayer = MediaPlayer.create(this, R.raw.lucky_dube_mickey_mouse_freedom)
-        // if mediaPlayer is null, then use system default ringtone
-        if (mediaPlayer == null) {
-            val defaultRingtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
-            mediaPlayer = MediaPlayer.create(this, defaultRingtoneUri)
-        }
-        mediaPlayer?.isLooping = true
-        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-
         try {
             val channelId = AppConstants.ALARM_CHANNEL_ID
             val notification = NotificationCompat.Builder(this, channelId)
@@ -68,25 +61,17 @@ class RightOnPlayAndVibrateService : Service() {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setOngoing(true)
                 .addAction(
-                    R.drawable.ic_launcher_foreground,
-                    "Stop",
-                    PendingIntent.getBroadcast(
-                        this,
-                        0,
-                        Intent(this, AlarmReceiver::class.java).apply {
+                    R.drawable.ic_launcher_foreground, "Stop", PendingIntent.getBroadcast(
+                        this, 0, Intent(this, AlarmReceiver::class.java).apply {
                             action = AppConstants.ACTION_STOP_ALARM
-                        },
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        }, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
                 )
                 .build()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 Log.d("RightOnPlayAndVibrateService", "startForeground with foregroundServiceType")
                 startForeground(
-                    /* id = */ 1,
-                    /* notification = */ notification,
-                    /* foregroundServiceType = */
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    1, notification, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
                     } else {
                         0
@@ -94,13 +79,9 @@ class RightOnPlayAndVibrateService : Service() {
                 )
             } else {
                 Log.d(
-                    "RightOnPlayAndVibrateService",
-                    "startForeground without foregroundServiceType"
+                    "RightOnPlayAndVibrateService", "startForeground without foregroundServiceType"
                 )
-                startForeground(
-                    /* id = */ 1,
-                    /* notification = */ notification
-                )
+                startForeground(1, notification)
             }
         } catch (e: Exception) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && e is ForegroundServiceStartNotAllowedException) {
@@ -113,24 +94,48 @@ class RightOnPlayAndVibrateService : Service() {
             } else {
                 Log.e("RightOnPlayAndVibrateService", "startForegroundService failed ${e.message}")
             }
-            // ...
         }
     }
 
     // onStartCommand is called when the service is started
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val selectedRingtone = intent?.getStringExtra(AppConstants.SELECTED_RINGTONE)
+        val selectedRingtoneFrom: AddAlarmFragment.Companion.RingtoneFrom = intent?.getStringExtra(AppConstants.SELECTED_RINGTONE_FROM)?.let {
+            AddAlarmFragment.Companion.RingtoneFrom.valueOf(it)
+        } ?: AddAlarmFragment.Companion.RingtoneFrom.DEFAULT
+
+        // cast selectedRingtoneFrom to Enum
+        Log.d("RightOnPlayAndVibrateService", "selectedRingtone: $selectedRingtone")
+        Log.d("RightOnPlayAndVibrateService", "selectedRingtoneFrom: $selectedRingtoneFrom")
+
+        when (selectedRingtoneFrom) {
+            AddAlarmFragment.Companion.RingtoneFrom.DEFAULT -> {
+                val defaultRingtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+                mediaPlayer = MediaPlayer.create(this, defaultRingtoneUri)
+            }
+            AddAlarmFragment.Companion.RingtoneFrom.SPOTIFY -> {
+    //            spotifyAppRemote?.playerApi?.play(selectedRingtone)
+            }
+            else -> {
+                mediaPlayer = MediaPlayer.create(this, Uri.parse(selectedRingtone))
+            }
+        }
+        // if mediaPlayer is null, then use system default ringtone
+        if (mediaPlayer == null) {
+            val defaultRingtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+            mediaPlayer = MediaPlayer.create(this, defaultRingtoneUri)
+        }
+        mediaPlayer?.isLooping = true
+        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
         when (intent?.action) {
             ACTION_PLAY_RINGTONE -> {
-                val param1 = intent.getStringExtra(EXTRA_PARAM1)
-                val param2 = intent.getStringExtra(EXTRA_PARAM2)
-                handleActionPlayRingtone(param1, param2)
-                handleActionVibrate(param1, param2)
+                handleActionPlayRingtone(selectedRingtone, selectedRingtoneFrom)
+                handleActionVibrate(selectedRingtone, selectedRingtoneFrom)
             }
 
             ACTION_VIBRATE -> {
-                val param1 = intent.getStringExtra(EXTRA_PARAM1)
-                val param2 = intent.getStringExtra(EXTRA_PARAM2)
-                handleActionVibrate(param1, param2)
+                handleActionVibrate(selectedRingtone, selectedRingtoneFrom)
             }
         }
         return START_NOT_STICKY
@@ -148,7 +153,7 @@ class RightOnPlayAndVibrateService : Service() {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private fun handleActionPlayRingtone(param1: String?, param2: String?) {
+    private fun handleActionPlayRingtone(selectedRingtone: String?, selectedRingtoneFrom: AddAlarmFragment.Companion.RingtoneFrom) {
         // continue playing the ringtone until the user stops it
 //        TODO: mediaPlayer?.start()
 //        mediaPlayer?.start()
@@ -158,7 +163,7 @@ class RightOnPlayAndVibrateService : Service() {
      * Handle action Baz in the provided background thread with the provided
      * parameters.
      */
-    private fun handleActionVibrate(param1: String?, param2: String?) {
+    private fun handleActionVibrate(selectedRingtone: String?, selectedRingtoneFrom: AddAlarmFragment.Companion.RingtoneFrom) {
         val vibrationEffect = VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE)
         while (mediaPlayer?.isPlaying == true) {
             vibrator.vibrate(vibrationEffect)
@@ -176,11 +181,11 @@ class RightOnPlayAndVibrateService : Service() {
          */
         // TODO: Customize helper method
         @JvmStatic
-        fun startActionPlayRingtone(context: Context, param1: String, param2: String) {
+        fun startActionPlayRingtone(context: Context, selectedRingtone: String, selectedRingtoneFrom: String) {
             val intent = Intent(context, RightOnPlayAndVibrateService::class.java).apply {
                 action = ACTION_PLAY_RINGTONE
-                putExtra(EXTRA_PARAM1, param1)
-                putExtra(EXTRA_PARAM2, param2)
+                putExtra(AppConstants.SELECTED_RINGTONE, selectedRingtone)
+                putExtra(AppConstants.SELECTED_RINGTONE_FROM, selectedRingtoneFrom)
             }
             context.startService(intent)
         }

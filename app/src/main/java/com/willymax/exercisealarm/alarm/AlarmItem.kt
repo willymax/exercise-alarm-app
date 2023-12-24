@@ -3,10 +3,12 @@ package com.willymax.exercisealarm.alarm
 import android.util.Log
 import com.willymax.exercisealarm.AddAlarmFragment
 import com.willymax.exercisealarm.utils.AlarmActivities
+import java.text.SimpleDateFormat
 import java.time.Clock
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 // extended parcelable
 data class AlarmItem(
@@ -46,7 +48,7 @@ data class AlarmItem(
             Log.d(AlarmItem::class.java.name, "Alarm Time: $alarmTime")
             alarmTimes.add(alarmTime)
         }
-        return alarmTimes
+        return alarmTimes.sorted()
     }
 
     private fun calculateDaysRemaining(day: DayOfWeek, hour: Int, minute: Int): Long {
@@ -59,6 +61,12 @@ data class AlarmItem(
         }
 
         return ChronoUnit.DAYS.between(now, then)
+    }
+    fun getAlarmTimeStr(): String {
+        return SimpleDateFormat(
+            "HH:mm",
+            Locale.US
+        ).format(getTheAlarmTimes()[0].atZone(Clock.systemDefaultZone().zone).toInstant().toEpochMilli())
     }
 
     override fun toString(): String =

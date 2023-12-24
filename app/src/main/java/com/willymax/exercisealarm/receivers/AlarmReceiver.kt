@@ -22,7 +22,9 @@ class AlarmReceiver : BroadcastReceiver() {
         if (action == AppConstants.ACTION_START_ALARM) {
             val alarmActivity = intent.getStringExtra(AppConstants.ALARM_ACTIVITY) ?: return
             if (alarmActivity == AlarmActivities.WALKING.name) {
-                RightOnPlayAndVibrateService.startActionPlayRingtone(context, "param1", "param2")
+                val selectedRingtone = intent.getStringExtra(AppConstants.SELECTED_RINGTONE) ?: ""
+                val selectedRingtoneFrom = intent.getStringExtra(AppConstants.SELECTED_RINGTONE_FROM) ?: ""
+                RightOnPlayAndVibrateService.startActionPlayRingtone(context, selectedRingtone, selectedRingtoneFrom)
                 val extraStepCount = intent.getIntExtra(
                     WalkingActivity.EXTRA_STEP_COUNT,
                     AppConstants.DEFAULT_NUMBER_OF_STEPS

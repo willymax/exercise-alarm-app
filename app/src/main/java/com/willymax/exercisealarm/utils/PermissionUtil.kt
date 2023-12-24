@@ -99,18 +99,14 @@ object PermissionUtil {
         activity: Activity,
         title: String?,
         msg: String?,
-        permissions: Array<String?>?,
-        requestCode: Int
+        positiveListener: DialogInterface.OnClickListener?,
+        negativeListener: DialogInterface.OnClickListener?
     ) {
         val builder = AlertDialog.Builder(activity)
         builder.setTitle(title)
         builder.setMessage(msg)
         builder.setPositiveButton(R.string.ALLOW) { dialogInterface, i ->
-            ActivityCompat.requestPermissions(
-                activity,
-                permissions!!,
-                requestCode
-            )
+            positiveListener?.onClick(dialogInterface, i)
         }
         builder.setNegativeButton(R.string.DENY) { dialog: DialogInterface?, which: Int ->
             Snackbar.make(
@@ -118,6 +114,7 @@ object PermissionUtil {
                 R.string.permission_denied,
                 Snackbar.LENGTH_SHORT
             ).show()
+            negativeListener?.onClick(dialog, which)
         }
         builder.show()
     }
